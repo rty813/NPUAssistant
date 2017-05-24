@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">NPUAssistant</string>
+    <string name="codeImage">验证码</string>
+    <string name="usernameHint">学号</string>
+    <string name="passwordHint">密码</string>
+    <string name="imagecodeHint">验证码</string>
+</resources>
