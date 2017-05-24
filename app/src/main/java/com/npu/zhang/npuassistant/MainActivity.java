@@ -1,16 +1,20 @@
 package com.npu.zhang.npuassistant;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import org.jsoup.Jsoup;
@@ -47,13 +51,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button btn_login;
     private OkHttpClient client;
     private String lt;
+    private byte[] pic_bt;
     private Handler mHandler;
     private String username = "2015300955";
     private String password = "J2mv9jyyq6";
     private String imagecode;
-    private String text;
+    private ProgressDialog progressDialog;
 
-    private static final String CODEIMAGEURL = "https://uis.nwpu.edu.cn/cas/codeimagetest";
+    private static final String CODEIMAGEURL = "https://uis.nwpu.edu.cn/cas/codeimage";
     private static final String LOGIN_URL = "https://uis.nwpu.edu.cn/cas/login?service=https%3A%2F%2Fecampus.nwpu.edu.cn%2Fc%2Fportal%2Flogin";
     private static final String CARD_URL = "https://ecampus.nwpu.edu.cn/web/guest/index?p_p_id=indexuserdata_WAR_jigsawportalindexuserdataportlet&p_p_lifecycle=2&p_p_state=normal&p_p_mode=view&p_p_resource_id=loadCardData&p_p_cacheability=cacheLevelPage&p_p_col_id=column-1&p_p_col_pos=1&p_p_col_count=3";
     private static final String LITERATURE_URL = "https://ecampus.nwpu.edu.cn/web/guest/index?p_p_id=indexuserdata_WAR_jigsawportalindexuserdataportlet&p_p_lifecycle=2&p_p_state=normal&p_p_mode=view&p_p_resource_id=loadLiteratureData&p_p_cacheability=cacheLevelPage&p_p_col_id=column-1&p_p_col_pos=1&p_p_col_count=3";
@@ -72,25 +77,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btn_login = (Button) findViewById(R.id.btn_login);
 
         btn_login.setOnClickListener(this);
+        imageView.setOnClickListener(this);
         getTxtFileInfo();
+
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progressDialog.setTitle("提示");
+        progressDialog.setMessage("登陆中");
+        progressDialog.setCancelable(false);
 
         mHandler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
                 switch (msg.what) {
                     case 0:
-                        File file = new File(getApplicationContext().getFilesDir().getAbsolutePath() + "/codeImage.jpg");
-                        Bitmap bitmap1 = BitmapFactory.decodeFile(String.valueOf(file));
-                        imageView.setImageBitmap(bitmap1);
+                        Bitmap bitmap = BitmapFactory.decodeByteArray(pic_bt, 0, pic_bt.length);
+                        imageView.setImageBitmap(bitmap);
+                        ViewGroup.MarginLayoutParams marginLayoutParams = new ViewGroup.MarginLayoutParams(imageView.getLayoutParams());
+                        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(marginLayoutParams);
+                        layoutParams.height = et_codeimage.getHeight();
+                        imageView.setLayoutParams(layoutParams);
                         break;
                     case 1:
-                        Toast.makeText(MainActivity.this, text, Toast.LENGTH_LONG).show();
+                        progressDialog.dismiss();
                         break;
                 }
             }
         };
-
-
 
         CookieManager cookieManager = new CookieManager();
         cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
@@ -102,57 +115,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .retryOnConnectionFailure(true)
                 .build();
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-//                获取lt
-                Request.Builder builder = new Request.Builder().url(LOGIN_URL);
-                Request request = builder.build();
-                Call call = client.newCall(request);
-                try {
-                    Response response = call.execute();
-                    String html = response.body().string();
-                    Document document = Jsoup.parse(html);
-                    Elements inputTags = document.select("input");
-                    for (Element inputTag : inputTags) {
-                        if (inputTag.attr("name").equals("lt")) {
-                            lt = inputTag.attr("value");
-                            System.out.println(lt);
-                        }
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-//                获取验证码
-                builder = new Request.Builder().url(CODEIMAGEURL);
-                request = builder.build();
-                call = client.newCall(request);
-                try {
-                    Response response = call.execute();
-                    InputStream inputStream = response.body().byteStream();
-                    byte[] bytes = new byte[1024];
-                    File file = new File(getApplicationContext().getFilesDir().getAbsolutePath() + "/codeImage.jpg");
-                    FileOutputStream fileOutputStream = new FileOutputStream(file);
-                    int size;
-                    while ((size = inputStream.read(bytes)) != -1) {
-                        fileOutputStream.write(bytes, 0, size);
-                    }
-                    inputStream.close();
-                    fileOutputStream.close();
-                    mHandler.sendEmptyMessage(0);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-            }
-        }).start();
+        new GetImageCode().start();
     }
 
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.btn_login:
+                progressDialog.show();
                 username = et_username.getText().toString();
                 password = et_password.getText().toString();
                 imagecode = et_codeimage.getText().toString();
@@ -227,10 +197,48 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
+                        mHandler.sendEmptyMessage(1);
                         startActivity(intent);
                     }
                 }).start();
                 break;
+            case R.id.imageview:
+                new GetImageCode().start();
+        }
+    }
+
+    private class GetImageCode extends Thread{
+        @Override
+        public void run() {
+            Request.Builder builder = new Request.Builder().url(LOGIN_URL);
+            Request request = builder.build();
+            Call call = client.newCall(request);
+            try {
+                Response response = call.execute();
+                String html = response.body().string();
+                Document document = Jsoup.parse(html);
+                Elements inputTags = document.select("input");
+                for (Element inputTag : inputTags) {
+                    if (inputTag.attr("name").equals("lt")) {
+                        lt = inputTag.attr("value");
+                        System.out.println(lt);
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+//                获取验证码
+            builder = new Request.Builder().url(CODEIMAGEURL);
+            request = builder.build();
+            call = client.newCall(request);
+            try {
+                Response response = call.execute();
+                pic_bt = response.body().bytes();
+                mHandler.sendEmptyMessage(0);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 

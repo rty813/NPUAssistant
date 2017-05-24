@@ -3,6 +3,7 @@ package com.npu.zhang.npuassistant;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.method.ScrollingMovementMethod;
 import android.widget.TextView;
 
 public class DetailActivity extends AppCompatActivity {
@@ -21,6 +22,8 @@ public class DetailActivity extends AppCompatActivity {
         tv_card = (TextView) findViewById(R.id.tv_card);
         tv_schedule = (TextView) findViewById(R.id.tv_schedule);
         tv_literature = (TextView) findViewById(R.id.tv_literatrue);
+
+        tv_schedule.setMovementMethod(ScrollingMovementMethod.getInstance());
 
 
         Intent intent = getIntent();
