@@ -1,35 +1,82 @@
 package com.npu.zhang.npuassistant;
 
 import android.content.Intent;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.method.ScrollingMovementMethod;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class DetailActivity extends AppCompatActivity {
-
-    private TextView tv_book;
-    private TextView tv_card;
-    private TextView tv_schedule;
-    private TextView tv_literature;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_detail);
-
-        tv_book = (TextView) findViewById(R.id.tv_book);
-        tv_card = (TextView) findViewById(R.id.tv_card);
-        tv_schedule = (TextView) findViewById(R.id.tv_schedule);
-        tv_literature = (TextView) findViewById(R.id.tv_literatrue);
-
-        tv_schedule.setMovementMethod(ScrollingMovementMethod.getInstance());
-
-
-        Intent intent = getIntent();
-        tv_book.setText(intent.getStringExtra("book"));
-        tv_card.setText(intent.getStringExtra("card"));
-        tv_schedule.setText(intent.getStringExtra("schedule"));
-        tv_literature.setText(intent.getStringExtra("literature"));
+        setContentView(R.layout.cardview);
+        findView();
+        getData();
     }
+
+    private void findView(){
+    }
+
+    private void getData(){
+        Intent intent = getIntent();
+        String text = intent.getStringExtra("card");
+        ((TextView)findViewById(R.id.tv_cardblance)).setText(getCardData(text)[0]);
+        ((TextView)findViewById(R.id.tv_payment)).setText(getCardData(text)[1]);
+        ((TextView)findViewById(R.id.tv_occurrenceTime)).setText(getCardData(text)[2]);
+        ((TextView)findViewById(R.id.tv_operationTitle)).setText(getCardData(text)[3]);
+
+        text = intent.getStringExtra("book");
+        ((TextView)findViewById(R.id.tv_circsCount)).setText(getBookInfo(text)[0]);
+        ((TextView)findViewById(R.id.tv_debt)).setText(getBookInfo(text)[1]);
+        ((TextView)findViewById(R.id.tv_minDueDayBookDate)).setText(getBookInfo(text)[2]);
+        ((TextView)findViewById(R.id.tv_expiredBookCount)).setText(getBookInfo(text)[3]);
+
+        System.out.println(intent.getStringExtra("exam"));
+    }
+
+    @Nullable
+    private String[] getCardData(String card){
+        try {
+            JSONObject jsonObject = new JSONObject(card);
+            JSONObject data = jsonObject.getJSONObject("data");
+            JSONArray list = data.getJSONArray("list");
+            JSONObject recentRecord = list.getJSONObject(0);
+            String blance = recentRecord.getString("blance");
+            String payment = recentRecord.getString("payment");
+            String occurrenceTime = recentRecord.getString("occurrenceTime");
+            String operationTitle = recentRecord.getString("operationTitle");
+            String[] result = new String[]{blance, payment, occurrenceTime, operationTitle};
+            return result;
+        } catch (JSONException e) {
+            Toast.makeText(DetailActivity.this, "登陆失败！", Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
+    @Nullable
+    private String[] getBookInfo(String book){
+        try {
+            JSONObject jsonObject = new JSONObject(book);
+            JSONObject data = jsonObject.getJSONObject("data");
+            String circsCount = data.getString("circsCount");
+            String debt = data.getString("debt");
+            String minDueDayBookDate = data.getString("minDueDayBookDate");
+            String expiredBookCount = data.getString("expiredBookCount");
+            String[] result = new String[]{circsCount, debt, minDueDayBookDate, expiredBookCount};
+            return result;
+        } catch (JSONException e) {
+            Toast.makeText(DetailActivity.this, "登陆失败！", Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 }

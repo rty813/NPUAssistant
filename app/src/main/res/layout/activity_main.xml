@@ -33,6 +33,7 @@
         android:layout_marginLeft="40dp"
         android:layout_marginRight="40dp"
         android:drawableLeft="@drawable/login_code_in_img"
+        android:inputType="textPassword"
         android:drawablePadding="10dp"
         android:hint="密码"
         android:id="@+id/et_password"

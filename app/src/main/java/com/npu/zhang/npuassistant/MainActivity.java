@@ -42,6 +42,8 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
+import static com.npu.zhang.npuassistant.UrlCollection.*;
+
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private EditText et_codeimage;
     private EditText et_username;
@@ -58,12 +60,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private String imagecode;
     private ProgressDialog progressDialog;
 
-    private static final String CODEIMAGEURL = "https://uis.nwpu.edu.cn/cas/codeimage";
-    private static final String LOGIN_URL = "https://uis.nwpu.edu.cn/cas/login?service=https%3A%2F%2Fecampus.nwpu.edu.cn%2Fc%2Fportal%2Flogin";
-    private static final String CARD_URL = "https://ecampus.nwpu.edu.cn/web/guest/index?p_p_id=indexuserdata_WAR_jigsawportalindexuserdataportlet&p_p_lifecycle=2&p_p_state=normal&p_p_mode=view&p_p_resource_id=loadCardData&p_p_cacheability=cacheLevelPage&p_p_col_id=column-1&p_p_col_pos=1&p_p_col_count=3";
-    private static final String LITERATURE_URL = "https://ecampus.nwpu.edu.cn/web/guest/index?p_p_id=indexuserdata_WAR_jigsawportalindexuserdataportlet&p_p_lifecycle=2&p_p_state=normal&p_p_mode=view&p_p_resource_id=loadLiteratureData&p_p_cacheability=cacheLevelPage&p_p_col_id=column-1&p_p_col_pos=1&p_p_col_count=3";
-    private static final String BOOK_URL = "https://ecampus.nwpu.edu.cn/web/guest/index?p_p_id=indexuserdata_WAR_jigsawportalindexuserdataportlet&p_p_lifecycle=2&p_p_state=normal&p_p_mode=view&p_p_resource_id=loadBookData&p_p_cacheability=cacheLevelPage&p_p_col_id=column-1&p_p_col_pos=1&p_p_col_count=3";
-    private static final String SCHEDULE_URL = "https://ecampus.nwpu.edu.cn/web/guest/calendar?p_p_id=calendar_WAR_jigsawportalcalendarportlet&p_p_lifecycle=2&p_p_state=normal&p_p_mode=view&p_p_resource_id=loadEventsForBootstrapCalendar&p_p_cacheability=cacheLevelPage&p_p_col_id=column-1&p_p_col_count=1&_calendar_WAR_jigsawportalcalendarportlet_from=1493568000000&_calendar_WAR_jigsawportalcalendarportlet_to=1496246400000&_calendar_WAR_jigsawportalcalendarportlet_utc_offset=-480&_calendar_WAR_jigsawportalcalendarportlet_browser_timezone=Asia%2FShanghai";
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -130,6 +128,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
+//                        模拟登陆翱翔门户
                         RequestBody body = new FormBody.Builder()
                                 .add("username", username)
                                 .add("password", password)
@@ -150,53 +149,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         }
 
                         Intent intent = new Intent(MainActivity.this, DetailActivity.class);
-                        //card
+                        intent.putExtra("card", getData(CARDDETAIL_URL));
+                        intent.putExtra("book", getData(BOOK_URL));
+                        intent.putExtra("schedule", getData(SCHEDULE_URL));
+
+//                        模拟登陆教务系统
+                        body = new FormBody.Builder()
+                                .add("username", username)
+                                .add("password", password)
+                                .build();
                         request = new Request.Builder()
-                                .url(CARD_URL)
+                                .url(JW_LOGIN_URL)
+                                .post(body)
                                 .build();
                         call = client.newCall(request);
                         try {
-                            Response response = call.execute();
-                            intent.putExtra("card", response.body().string());
+                            call.execute();
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
 
-                        //book
-                        request = new Request.Builder()
-                                .url(BOOK_URL)
-                                .build();
-                        call = client.newCall(request);
-                        try {
-                            Response response = call.execute();
-                            intent.putExtra("book", response.body().string());
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                        intent.putExtra("exam", getData(JW_EXAM_URL));
 
-                        //literature
-                        request = new Request.Builder()
-                                .url(LITERATURE_URL)
-                                .build();
-                        call = client.newCall(request);
-                        try {
-                            Response response = call.execute();
-                            intent.putExtra("literature", response.body().string());
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-
-                        //schedule
-                        request = new Request.Builder()
-                                .url(SCHEDULE_URL)
-                                .build();
-                        call = client.newCall(request);
-                        try {
-                            Response response = call.execute();
-                            intent.putExtra("schedule", response.body().string());
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
                         mHandler.sendEmptyMessage(1);
                         startActivity(intent);
                     }
@@ -205,6 +179,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.imageview:
                 new GetImageCode().start();
         }
+    }
+
+    private String getData(String url){
+        Request request = new Request.Builder()
+                .url(url)
+                .build();
+        Call call = client.newCall(request);
+        try {
+            Response response = call.execute();
+            return response.body().string();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private String getData2(String url){
+        Request request = new Request.Builder()
+                .url(url)
+                .build();
+        Call call = client.newCall(request);
+        try {
+            Response response = call.execute();
+            return response.body().string();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     private class GetImageCode extends Thread{
