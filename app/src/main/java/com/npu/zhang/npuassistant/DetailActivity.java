@@ -38,6 +38,22 @@ public class DetailActivity extends AppCompatActivity {
         ((TextView)findViewById(R.id.tv_expiredBookCount)).setText(getBookInfo(text)[3]);
 
         System.out.println(intent.getStringExtra("exam"));
+        Toast.makeText(DetailActivity.this, getExceciseData(intent.getStringExtra("exercise"))[0], Toast.LENGTH_LONG).show();
+    }
+
+    @Nullable
+    private String[] getExceciseData(String exercise){
+        try {
+            JSONObject jsonObject = new JSONObject(exercise);
+            JSONObject data = (JSONObject) jsonObject.getJSONArray("Result").get(0);
+            String num = data.getString("NUM");
+            String[] result = new String[]{num};
+            return result;
+        } catch (JSONException e) {
+            Toast.makeText(DetailActivity.this, "登陆失败！", Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+        }
+        return null;
     }
 
     @Nullable

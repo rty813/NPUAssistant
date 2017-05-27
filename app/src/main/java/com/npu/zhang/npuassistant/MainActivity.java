@@ -61,8 +61,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private ProgressDialog progressDialog;
 
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -152,6 +150,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         intent.putExtra("card", getData(CARDDETAIL_URL));
                         intent.putExtra("book", getData(BOOK_URL));
                         intent.putExtra("schedule", getData(SCHEDULE_URL));
+                        intent.putExtra("exercise", getData(EXERCISE_URL + username + "%7D"));
 
 //                        模拟登陆教务系统
                         body = new FormBody.Builder()
