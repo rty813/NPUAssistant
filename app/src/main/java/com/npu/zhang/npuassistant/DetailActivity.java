@@ -1,5 +1,6 @@
 package com.npu.zhang.npuassistant;
 
+import android.appwidget.AppWidgetManager;
 import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -37,8 +38,13 @@ public class DetailActivity extends AppCompatActivity {
         ((TextView)findViewById(R.id.tv_minDueDayBookDate)).setText(getBookInfo(text)[2]);
         ((TextView)findViewById(R.id.tv_expiredBookCount)).setText(getBookInfo(text)[3]);
 
-        System.out.println(intent.getStringExtra("exam"));
-        Toast.makeText(DetailActivity.this, getExceciseData(intent.getStringExtra("exercise"))[0], Toast.LENGTH_LONG).show();
+//        System.out.println(intent.getStringExtra("exam"));
+        String[] exerciseData = getExceciseData(intent.getStringExtra("exercise"));
+        Intent intent1 = new Intent("com.npu.zhang.npuassistant.EXERCISE_UPDATE");
+        intent1.putExtra("exercise_num", "跑操次数：" + exerciseData[0]);
+        intent1.putExtra("exercise_pe", exerciseData[5]);
+        intent1.putExtra("exercise_teacher", exerciseData[6]);
+        sendBroadcast(intent1);
     }
 
     @Nullable
@@ -46,8 +52,15 @@ public class DetailActivity extends AppCompatActivity {
         try {
             JSONObject jsonObject = new JSONObject(exercise);
             JSONObject data = (JSONObject) jsonObject.getJSONArray("Result").get(0);
-            String num = data.getString("NUM");
-            String[] result = new String[]{num};
+            String NUM = data.getString("NUM");
+            String MINUTES = data.getString("MINUTES");
+            String KM = data.getString("MINUTES");
+            String CAL = data.getString("MINUTES");
+            String TODAYNUM = data.getString("MINUTES");
+            String PE = data.getString("PE");
+            String TEACHER = data.getString("TEACHER");
+
+            String[] result = new String[]{NUM, MINUTES, KM, CAL, TODAYNUM, PE, TEACHER};
             return result;
         } catch (JSONException e) {
             Toast.makeText(DetailActivity.this, "登陆失败！", Toast.LENGTH_LONG).show();
