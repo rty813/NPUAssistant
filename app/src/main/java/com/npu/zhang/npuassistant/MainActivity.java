@@ -32,10 +32,17 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
+import java.net.CookieStore;
+import java.net.HttpCookie;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Call;
+import okhttp3.Cookie;
 import okhttp3.FormBody;
+import okhttp3.HttpUrl;
+import okhttp3.Interceptor;
 import okhttp3.JavaNetCookieJar;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -60,12 +67,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private String imagecode;
     private ProgressDialog progressDialog;
 
+    private CookieManager cookieManager;
+    public static MyCookie myCookie;
+
+    public class ReceivedCookiesInterceptor implements Interceptor{
+        @Override
+        public Response intercept(Chain chain) throws IOException {
+            Response originalResponse = chain.proceed(chain.request());
+            List<String> cookieList =  originalResponse.headers("Set-Cookie");
+            if(cookieList != null) {
+                for(String s:cookieList) {//Cookie的格式为:cookieName=cookieValue;path=xxx
+                    System.out.println("Cookie!!!!:::::" + s);
+                }
+            }
+            return originalResponse;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        myCookie = new MyCookie();
         et_codeimage = (EditText) findViewById(R.id.et_imagecode);
         et_username = (EditText) findViewById(R.id.et_username);
         et_password = (EditText) findViewById(R.id.et_password);
@@ -101,7 +125,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         };
 
-        CookieManager cookieManager = new CookieManager();
+        cookieManager = new CookieManager();
         cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
         client = new OkHttpClient().newBuilder()
                 .cookieJar(new JavaNetCookieJar(cookieManager))
@@ -110,7 +134,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .writeTimeout(20, TimeUnit.SECONDS)
                 .retryOnConnectionFailure(true)
                 .build();
-
         new GetImageCode().start();
     }
 
@@ -145,13 +168,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
+                        List<HttpCookie> cookieList = cookieManager.getCookieStore().getCookies();
+                        for (int i = cookieList.size()-1; i>=0; i--){
+                            if ((cookieList.get(i).toString()).contains("JSESSIONID")){
+                                myCookie.setAXCookie(cookieList.get(i).toString());
+                                break;
+                            }
+                        }
+
 
                         Intent intent = new Intent(MainActivity.this, DetailActivity.class);
                         intent.putExtra("card", getData(CARDDETAIL_URL));
                         intent.putExtra("book", getData(BOOK_URL));
                         intent.putExtra("schedule", getData(SCHEDULE_URL));
                         intent.putExtra("exercise", getData(EXERCISE_URL + username + "%7D"));
-
 //                        模拟登陆教务系统
                         body = new FormBody.Builder()
                                 .add("username", username)
@@ -168,8 +198,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             e.printStackTrace();
                         }
 
+                        cookieList = cookieManager.getCookieStore().getCookies();
+                        for (int i = cookieList.size()-1; i>=0; i--){
+                            if ((cookieList.get(i).toString()).contains("JSESSIONID")){
+                                myCookie.setJWCookie(cookieList.get(i).toString());
+                                break;
+                            }
+                        }
                         intent.putExtra("exam", getData(JW_EXAM_URL));
-
                         mHandler.sendEmptyMessage(1);
                         startActivity(intent);
                     }
@@ -187,24 +223,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Call call = client.newCall(request);
         try {
             Response response = call.execute();
+//            List<HttpCookie> cookieList = cookieManager.getCookieStore().getCookies();
+//            for (HttpCookie cookie : cookieList){
+//                System.out.println(cookie);
+//            }
             return response.body().string();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return null;
-    }
 
-    private String getData2(String url){
-        Request request = new Request.Builder()
-                .url(url)
-                .build();
-        Call call = client.newCall(request);
-        try {
-            Response response = call.execute();
-            return response.body().string();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         return null;
     }
 

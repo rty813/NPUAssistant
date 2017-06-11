@@ -13,11 +13,12 @@
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".DetailActivity" />
+        <activity android:name=".DetailActivity" >
+
+        </activity>
 
         <receiver android:name=".NewAppWidget">
             <intent-filter>
@@ -29,6 +30,8 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/new_app_widget_info" />
         </receiver>
+
+        <activity android:name=".LoginActivity"></activity>
     </application>
 
 </manifest>

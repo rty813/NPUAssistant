@@ -3,7 +3,8 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="#e0000000"
+    android:background="@drawable/shape_corner"
+    android:alpha="100"
     android:padding="@dimen/widget_margin">
 
     <TextView
@@ -11,7 +12,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_margin="8dp"
+        android:layout_margin="10dp"
         android:textColor="@android:color/white"
         style="@style/Base.TextAppearance.AppCompat.Large"
         android:text="@string/appwidget_text" />
@@ -20,7 +21,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_margin="8dp"
+        android:layout_margin="10dp"
         android:textColor="@android:color/white"
         style="@style/Base.TextAppearance.AppCompat.Large"
         android:text="@string/appwidget_text" />
@@ -29,7 +30,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_margin="8dp"
+        android:layout_margin="10dp"
         android:textColor="@android:color/white"
         style="@style/Base.TextAppearance.AppCompat.Large"
         android:text="@string/appwidget_text" />

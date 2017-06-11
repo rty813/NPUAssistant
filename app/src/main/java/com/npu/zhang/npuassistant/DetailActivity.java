@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,6 +20,15 @@ public class DetailActivity extends AppCompatActivity {
         setContentView(R.layout.cardview);
         findView();
         getData();
+
+        findViewById(R.id.cv_card).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(DetailActivity.this, LoginActivity.class);
+                intent.putExtra("url", "https://ecampus.nwpu.edu.cn/web/guest/userdata/carddetail");
+                startActivity(intent);
+            }
+        });
     }
 
     private void findView(){
