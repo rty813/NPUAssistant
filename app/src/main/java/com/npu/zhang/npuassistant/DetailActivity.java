@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,6 +27,17 @@ public class DetailActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent intent = new Intent(DetailActivity.this, LoginActivity.class);
                 intent.putExtra("url", "https://ecampus.nwpu.edu.cn/web/guest/userdata/carddetail");
+                intent.putExtra("cookie", MainActivity.myCookie.getAXCookie());
+                startActivity(intent);
+            }
+        });
+
+        findViewById(R.id.cv_papertest).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(DetailActivity.this, LoginActivity.class);
+                intent.putExtra("url", "http://us.nwpu.edu.cn/eams/stdExamTable.action");
+                intent.putExtra("cookie", MainActivity.myCookie.getJWCookie());
                 startActivity(intent);
             }
         });

@@ -7,10 +7,13 @@
     android:orientation="vertical"
     tools:context="com.npu.zhang.npuassistant.LoginActivity">
 
-    <WebView
+    <org.xwalk.core.XWalkView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/webview">
-    </WebView>
+        android:id="@+id/xwalkView"
+        android:background="#000000"
+        android:orientation="vertical" >
+
+    </org.xwalk.core.XWalkView>
 
 </LinearLayout>

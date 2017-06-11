@@ -312,6 +312,7 @@
         android:layout_height="80dp"
         app:cardBackgroundColor="@android:color/holo_red_light"
         android:clickable="true"
+        android:id="@+id/cv_papertest"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
         android:layout_marginBottom="15dp"

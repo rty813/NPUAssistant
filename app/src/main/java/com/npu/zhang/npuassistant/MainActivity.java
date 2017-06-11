@@ -169,12 +169,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             e.printStackTrace();
                         }
                         List<HttpCookie> cookieList = cookieManager.getCookieStore().getCookies();
-                        for (int i = cookieList.size()-1; i>=0; i--){
-                            if ((cookieList.get(i).toString()).contains("JSESSIONID")){
-                                myCookie.setAXCookie(cookieList.get(i).toString());
-                                break;
-                            }
-                        }
+
+                        myCookie.setAXCookie(cookieList.get(1).toString());
 
 
                         Intent intent = new Intent(MainActivity.this, DetailActivity.class);
