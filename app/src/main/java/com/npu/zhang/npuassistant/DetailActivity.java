@@ -64,17 +64,19 @@ public class DetailActivity extends AppCompatActivity {
         dialog.setTitle("提示");
         dialog.setMessage("正在登录教务系统");
         dialog.setCancelable(false);
-        dialog.show();
 
         myCookie = new MyCookie();
         getTxtFileInfo();
         if (username != null){
+            dialog.show();
             Intent intent = new Intent(this, JWDataService.class);
             intent.putExtra("username", username);
             intent.putExtra("password", password);
             bindService(intent, JWConnection, BIND_AUTO_CREATE);
         }
-
+        else{
+            startActivity(new Intent(this, MainActivity.class));
+        }
         findViewById(R.id.cv_card).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
