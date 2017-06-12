@@ -1,8 +1,16 @@
 package com.npu.zhang.npuassistant;
 
+import android.app.ProgressDialog;
 import android.appwidget.AppWidgetManager;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
+import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -10,24 +18,69 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.npu.zhang.npuassistant.Model.JWDataService;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
+import static com.npu.zhang.npuassistant.UrlCollection.*;
+
 public class DetailActivity extends AppCompatActivity {
+
+    private String username;
+    private String password;
+    public static MyCookie myCookie;
+    private AlertDialog.Builder builder;
+    private ProgressDialog dialog;
+
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            switch (intent.getAction()){
+                case "com.npu.zhang.npuassistant.finishJWLogin":
+                    dialog.dismiss();
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.cardview);
-        findView();
-        getData();
+//        findView();
+//        getData();
+        IntentFilter intentFilter = new IntentFilter("com.npu.zhang.npuassistant.finishJWLogin");
+        registerReceiver(broadcastReceiver, intentFilter);
+
+        dialog = new ProgressDialog(this);
+        dialog.setTitle("提示");
+        dialog.setMessage("正在登录教务系统");
+        dialog.setCancelable(false);
+        dialog.show();
+
+        myCookie = new MyCookie();
+        getTxtFileInfo();
+        if (username != null){
+            Intent intent = new Intent(this, JWDataService.class);
+            intent.putExtra("username", username);
+            intent.putExtra("password", password);
+            bindService(intent, JWConnection, BIND_AUTO_CREATE);
+        }
 
         findViewById(R.id.cv_card).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(DetailActivity.this, LoginActivity.class);
-                intent.putExtra("url", "https://ecampus.nwpu.edu.cn/web/guest/userdata/carddetail");
-                intent.putExtra("cookie", MainActivity.myCookie.getAXCookie());
+                intent.putExtra("url", CARD_WEB_URL);
+                intent.putExtra("cookie", myCookie.getAXCookie());
                 startActivity(intent);
             }
         });
@@ -36,15 +89,28 @@ public class DetailActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(DetailActivity.this, LoginActivity.class);
-                intent.putExtra("url", "http://us.nwpu.edu.cn/eams/stdExamTable.action");
-                intent.putExtra("cookie", MainActivity.myCookie.getJWCookie());
+                intent.putExtra("url", PAPERTEST_WEB_URL);
+                intent.putExtra("cookie", myCookie.getJWCookie());
                 startActivity(intent);
             }
         });
     }
 
-    private void findView(){
-    }
+    private final ServiceConnection JWConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+
+        }
+    };
+
+//    private void findView(){
+//
+//    }
 
     private void getData(){
         Intent intent = getIntent();
@@ -130,4 +196,27 @@ public class DetailActivity extends AppCompatActivity {
         return null;
     }
 
+
+    private void getTxtFileInfo(){
+        try {
+            File file = new File(getApplicationContext().getFilesDir().getAbsolutePath() + "/userinfo");
+            FileInputStream inputStream = new FileInputStream(file);
+            BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
+            String content = br.readLine();
+            String[] contents = content.split("##");
+            username = contents[0];
+            password = contents[1];
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        unregisterReceiver(broadcastReceiver);
+        unbindService(JWConnection);
+        super.onDestroy();
+    }
 }

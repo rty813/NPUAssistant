@@ -34,28 +34,9 @@ public class LoginActivity extends AppCompatActivity {
         XWalkCookieManager manager = new XWalkCookieManager();
         manager.setAcceptCookie(true);
         manager.setCookie(url, cookie);
-//        WebView webView = (WebView) findViewById(R.id.webview);
-//        webView.getSettings().setDisplayZoomControls(true);
-//        webView.getSettings().setUserAgentString("Mozilla/5.0 (Linux; Android 4.1.1; HTC One X Build/JRO03C) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.58 Mobile Safari/537.31");
-//        webView.getSettings().setJavaScriptEnabled(true);
-//        webView.getSettings().setBuiltInZoomControls(true);
-//        webView.getSettings().setSupportZoom(true);
-//        webView.getSettings().setLoadWithOverviewMode(true);
-//        webView.getSettings().setDomStorageEnabled(true);
-//
-////        webView.setWebViewClient(new WebViewClient(){
-////            @Override
-////            public boolean shouldOverrideUrlLoading(WebView view, String url) {
-////                view.loadUrl(url);
-////                return true;
-////            }
-////
-////            @Override
-////            public void onPageFinished(WebView view, String url) {
-////                super.onPageFinished(view, url);
-////            }
-////        });
-//        synCookies(this, url, cookie);
+
+        System.out.println(manager.getCookie(url));
+
         Map<String, String> map = new HashMap<>();
         map.put("Cookie", cookie);
         xWalkView.loadUrl(url);
