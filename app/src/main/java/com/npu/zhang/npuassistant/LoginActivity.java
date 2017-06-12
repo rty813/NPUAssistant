@@ -7,12 +7,14 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -33,6 +35,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Call;
+import okhttp3.Cookie;
 import okhttp3.FormBody;
 import okhttp3.JavaNetCookieJar;
 import okhttp3.OkHttpClient;
@@ -65,6 +68,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     private boolean flag_ax;
     private boolean flag_jw;
+    private boolean flag_err;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,8 +84,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         btn_login.setOnClickListener(this);
         imageView.setOnClickListener(this);
         getTxtFileInfo();
-
-        myProgressDialog = new MyProgressDialog(this);
 
         mHandler = new Handler() {
             @Override
@@ -103,14 +105,31 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                         break;
                 }
                 if ((flag_ax) && (flag_jw)){
-                    sendBroadcast(new Intent("com.npu.zhang.npuassistant.finishInput"));
-                    try {
-                        Thread.sleep(500);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                    if (!flag_err){
+                        saveUserInfo(username, password);
+                        sendBroadcast(new Intent("com.npu.zhang.npuassistant.finishInput"));
+                        try {
+                            Thread.sleep(500);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        myProgressDialog.dismiss();
+                        finish();
                     }
-                    myProgressDialog.dismiss();
-                    finish();
+                    else{
+                        Toast.makeText(LoginActivity.this, "请检查您的输入", Toast.LENGTH_SHORT).show();
+                        cookieManager.getCookieStore().removeAll();
+                        flag_ax = false;
+                        flag_jw = false;
+                        flag_err = false;
+                        new GetImageCode().start();
+                        try {
+                            Thread.sleep(500);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        myProgressDialog.dismiss();
+                    }
                 }
             }
         };
@@ -134,13 +153,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         switch (view.getId()) {
             case R.id.btn_login:
 //                progressDialog.show();
-                flag_ax = false;
-                flag_jw = false;
+                myProgressDialog = new MyProgressDialog(this);
                 myProgressDialog.show();
                 username = et_username.getText().toString();
                 password = et_password.getText().toString();
                 imagecode = et_codeimage.getText().toString();
-                saveUserInfo(username, password);
 
                 if (!imagecode.equals("")){
                     myProgressDialog.show_pb_ax(View.VISIBLE);
@@ -178,11 +195,32 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 Call call = client.newCall(request);
                 try {
                     Response response = call.execute();
-                    System.out.println(response.header("Connection") == null);
+                    if (response.header("Connection") != null){
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                myProgressDialog.show_pb_ax(View.GONE);
+                                myProgressDialog.show_iv_ax_wrong(View.VISIBLE);
+                                mHandler.sendEmptyMessage(1);
+                            }
+                        });
+                        flag_err = true;
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                myCookie.setAXCookie(cookieManager.getCookieStore().getCookies().get(1).toString());
+                if (flag_err){
+                    return;
+                }
+                System.out.println(cookieManager.getCookieStore().getCookies());
+                List<HttpCookie> cookies = cookieManager.getCookieStore().getCookies();
+                int i;
+                for (i = 0; i < cookies.size(); i++){
+                    if (cookies.get(i).toString().contains("biz")){
+                        break;
+                    }
+                }
+                myCookie.setAXCookie(cookieManager.getCookieStore().getCookies().get(i+1).toString());
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -215,10 +253,25 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             Call call = client.newCall(request);
             try {
                 Response response = call.execute();
-                System.out.println(response.header("Set-Cookie") == null);
+                if (response.header("Set-Cookie") != null){
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            myProgressDialog.show_pb_jw(View.GONE);
+                            myProgressDialog.show_iv_jw_wrong(View.VISIBLE);
+                            mHandler.sendEmptyMessage(2);
+                        }
+                    });
+                    flag_err = true;
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
+            if (flag_err){
+                return;
+            }
+
             List<HttpCookie> cookieList = cookieManager.getCookieStore().getCookies();
             for (int i = cookieList.size()-1; i>=0; i--){
                 if ((cookieList.get(i).toString()).contains("JSESSIONID")){
