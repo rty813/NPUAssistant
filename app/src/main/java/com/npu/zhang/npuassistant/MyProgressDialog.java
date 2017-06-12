@@ -2,6 +2,7 @@ package com.npu.zhang.npuassistant;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 
 /**
@@ -11,5 +12,11 @@ import android.support.annotation.NonNull;
 public class MyProgressDialog extends Dialog {
     public MyProgressDialog(@NonNull Context context) {
         super(context);
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.mydialog);
     }
 }

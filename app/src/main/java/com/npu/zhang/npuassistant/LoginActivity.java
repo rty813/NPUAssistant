@@ -26,6 +26,9 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        MyProgressDialog progressDialog = new MyProgressDialog(this);
+        progressDialog.show();
+
         Intent intent = getIntent();
         String url = intent.getStringExtra("url");
         String cookie = intent.getStringExtra("cookie");
@@ -41,16 +44,6 @@ public class LoginActivity extends AppCompatActivity {
         map.put("Cookie", cookie);
         xWalkView.loadUrl(url);
 //        webView.loadUrl(url);
-    }
-
-    public static void synCookies(Context context, String url, String cookie) {
-        CookieSyncManager.createInstance(context);
-        CookieManager cookieManager = CookieManager.getInstance();
-        cookieManager.setAcceptCookie(true);
-        cookieManager.removeSessionCookie();//移除
-        cookieManager.setCookie(url, cookie);//cookies是在HttpClient中获得的cookie
-        System.out.println(url + "\r\n" + cookie);
-        CookieSyncManager.getInstance().sync();
     }
 
     /**通过Activity管理XWalkWebView的声明周期*/
