@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.npu.zhang.npuassistant.LoginActivity">
+    tools:context="com.npu.zhang.npuassistant.WebDetailActivity">
 
     <org.xwalk.core.XWalkView
         android:layout_width="match_parent"

@@ -18,60 +18,82 @@
             android:layout_gravity="center"
             android:layout_margin="15dp"
             android:gravity="center"
-            android:text="消息提示"
+            android:text="登陆中"
             android:textColor="#38ADFF"
             android:textSize="16sp" />
 
-        <TextView
-            android:id="@+id/message"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
-            android:text="提示消息" />
-
-        <View
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="1px"
-            android:layout_marginTop="15dp"
-            android:background="#E4E4E4" />
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_margin="5dp"
+            android:orientation="horizontal">
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="5dp"
+                android:id="@+id/pb_ax"
+                android:visibility="gone"
+                style="?android:attr/progressBarStyleSmall"/>
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="5dp"
+                android:id="@+id/iv_ax_right"
+                android:visibility="gone"
+                android:src="@drawable/right"/>
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="5dp"
+                android:id="@+id/iv_ax_wrong"
+                android:visibility="gone"
+                android:src="@drawable/wrong"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="登录翱翔门户"/>
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="40dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_margin="5dp"
             android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/no"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="10dp"
-                android:layout_weight="1"
-                android:background="@null"
-                android:gravity="center"
-                android:singleLine="true"
-                android:text="No"
-                android:textColor="#7D7D7D"
-                android:textSize="16sp" />
-
-            <View
-                android:layout_width="1px"
-                android:layout_height="match_parent"
-                android:background="#E4E4E4" />
-
-            <Button
-                android:id="@+id/yes"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_marginRight="10dp"
-                android:layout_weight="1"
-                android:background="@null"
-                android:gravity="center"
-                android:singleLine="true"
-                android:text="Yes"
-                android:textColor="#38ADFF"
-                android:textSize="16sp" />
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="5dp"
+                android:id="@+id/pb_jw"
+                android:visibility="gone"
+                style="?android:attr/progressBarStyleSmall"/>
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="5dp"
+                android:id="@+id/iv_jw_right"
+                android:visibility="gone"
+                android:src="@drawable/right"/>
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="5dp"
+                android:id="@+id/iv_jw_wrong"
+                android:visibility="gone"
+                android:src="@drawable/wrong"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="登录教务系统"/>
         </LinearLayout>
+
+        <View
+            android:layout_height="1dp"
+            android:layout_width="1dp"
+            android:background="#11ffffff"
+            android:layout_marginTop="5dp"
+            />
     </LinearLayout>
 
 </RelativeLayout>

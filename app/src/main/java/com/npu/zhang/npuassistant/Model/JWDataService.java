@@ -3,9 +3,6 @@ package com.npu.zhang.npuassistant.Model;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
-import android.widget.Toast;
-
-import com.npu.zhang.npuassistant.MainActivity;
 
 import java.io.IOException;
 import java.net.CookieManager;
@@ -21,7 +18,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 
-import static com.npu.zhang.npuassistant.DetailActivity.myCookie;
+import static com.npu.zhang.npuassistant.CardViewActivity.myCookie;
 import static com.npu.zhang.npuassistant.UrlCollection.JW_LOGIN_URL;
 
 public class JWDataService extends Service {

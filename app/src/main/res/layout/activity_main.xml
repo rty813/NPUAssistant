@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.npu.zhang.npuassistant.MainActivity">
+    tools:context="com.npu.zhang.npuassistant.LoginActivity">
     <ImageView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -48,6 +48,9 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:hint="验证码"
+            android:maxLines="1"
+            android:singleLine="true"
+            android:imeOptions="actionGo"
             android:layout_marginTop="10dp"
             android:layout_marginLeft="40dp"
             android:drawableLeft="@drawable/login_confirm"

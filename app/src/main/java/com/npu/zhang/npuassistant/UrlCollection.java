@@ -16,4 +16,7 @@ public class UrlCollection {
 
     public static final String CARD_WEB_URL = "https://ecampus.nwpu.edu.cn/web/guest/userdata/carddetail";
     public static final String PAPERTEST_WEB_URL = "http://us.nwpu.edu.cn/eams/stdExamTable.action";
+    public static final String BOOK_WEB_URL = "http://202.117.255.187:8080/reader/hwthau.php";
+    public static final String SCHEDULE_WEB_URL = "http://us.nwpu.edu.cn/eams/courseTableForStd!courseTable.action";
+    public static final String GRADING_WEB_URL = "http://us.nwpu.edu.cn/eams/teach/grade/course/person.action";
 }

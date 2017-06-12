@@ -1,7 +1,6 @@
 package com.npu.zhang.npuassistant;
 
 import android.app.ProgressDialog;
-import android.appwidget.AppWidgetManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -13,7 +12,6 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -33,7 +31,7 @@ import java.io.InputStreamReader;
 
 import static com.npu.zhang.npuassistant.UrlCollection.*;
 
-public class DetailActivity extends AppCompatActivity {
+public class CardViewActivity extends AppCompatActivity implements View.OnClickListener{
 
     private String username;
     private String password;
@@ -47,6 +45,15 @@ public class DetailActivity extends AppCompatActivity {
             switch (intent.getAction()){
                 case "com.npu.zhang.npuassistant.finishJWLogin":
                     dialog.dismiss();
+                    break;
+                case "com.npu.zhang.npuassistant.finishInput":
+//                    getTxtFileInfo();
+//                    dialog.show();
+//                    Intent intent1 = new Intent(CardViewActivity.this, JWDataService.class);
+//                    intent1.putExtra("username", username);
+//                    intent1.putExtra("password", password);
+//                    bindService(intent1, JWConnection, BIND_AUTO_CREATE);
+                    break;
             }
         }
     };
@@ -55,9 +62,11 @@ public class DetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.cardview);
-//        findView();
+        findView();
 //        getData();
         IntentFilter intentFilter = new IntentFilter("com.npu.zhang.npuassistant.finishJWLogin");
+        intentFilter.addAction("com.npu.zhang.npuassistant.finishAXLogin");
+        intentFilter.addAction("com.npu.zhang.npuassistant.finishInput");
         registerReceiver(broadcastReceiver, intentFilter);
 
         dialog = new ProgressDialog(this);
@@ -75,27 +84,8 @@ public class DetailActivity extends AppCompatActivity {
             bindService(intent, JWConnection, BIND_AUTO_CREATE);
         }
         else{
-            startActivity(new Intent(this, MainActivity.class));
+            startActivity(new Intent(this, LoginActivity.class));
         }
-        findViewById(R.id.cv_card).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(DetailActivity.this, LoginActivity.class);
-                intent.putExtra("url", CARD_WEB_URL);
-                intent.putExtra("cookie", myCookie.getAXCookie());
-                startActivity(intent);
-            }
-        });
-
-        findViewById(R.id.cv_papertest).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(DetailActivity.this, LoginActivity.class);
-                intent.putExtra("url", PAPERTEST_WEB_URL);
-                intent.putExtra("cookie", myCookie.getJWCookie());
-                startActivity(intent);
-            }
-        });
     }
 
     private final ServiceConnection JWConnection = new ServiceConnection() {
@@ -110,9 +100,13 @@ public class DetailActivity extends AppCompatActivity {
         }
     };
 
-//    private void findView(){
-//
-//    }
+    private void findView(){
+        findViewById(R.id.cv_card).setOnClickListener(this);
+        findViewById(R.id.cv_papertest).setOnClickListener(this);
+        findViewById(R.id.cv_book).setOnClickListener(this);
+        findViewById(R.id.cv_grading).setOnClickListener(this);
+        findViewById(R.id.cv_schedule).setOnClickListener(this);
+    }
 
     private void getData(){
         Intent intent = getIntent();
@@ -153,7 +147,7 @@ public class DetailActivity extends AppCompatActivity {
             String[] result = new String[]{NUM, MINUTES, KM, CAL, TODAYNUM, PE, TEACHER};
             return result;
         } catch (JSONException e) {
-            Toast.makeText(DetailActivity.this, "登陆失败！", Toast.LENGTH_LONG).show();
+            Toast.makeText(CardViewActivity.this, "登陆失败！", Toast.LENGTH_LONG).show();
             e.printStackTrace();
         }
         return null;
@@ -173,7 +167,7 @@ public class DetailActivity extends AppCompatActivity {
             String[] result = new String[]{blance, payment, occurrenceTime, operationTitle};
             return result;
         } catch (JSONException e) {
-            Toast.makeText(DetailActivity.this, "登陆失败！", Toast.LENGTH_LONG).show();
+            Toast.makeText(CardViewActivity.this, "登陆失败！", Toast.LENGTH_LONG).show();
             e.printStackTrace();
         }
         return null;
@@ -192,7 +186,7 @@ public class DetailActivity extends AppCompatActivity {
             String[] result = new String[]{circsCount, debt, minDueDayBookDate, expiredBookCount};
             return result;
         } catch (JSONException e) {
-            Toast.makeText(DetailActivity.this, "登陆失败！", Toast.LENGTH_LONG).show();
+            Toast.makeText(CardViewActivity.this, "登陆失败！", Toast.LENGTH_LONG).show();
             e.printStackTrace();
         }
         return null;
@@ -220,5 +214,45 @@ public class DetailActivity extends AppCompatActivity {
         unregisterReceiver(broadcastReceiver);
         unbindService(JWConnection);
         super.onDestroy();
+    }
+
+    private void startDetailActivity(String url, String cookie){
+        Intent intent = new Intent(CardViewActivity.this, WebDetailActivity.class);
+        intent.putExtra("url", url);
+        intent.putExtra("cookie", cookie);
+        startActivity(intent);
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()){
+            case R.id.cv_book:
+                if (myCookie.getAXCookie() == null){
+                    Toast.makeText(CardViewActivity.this, "请先登录翱翔系统", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(CardViewActivity.this, LoginActivity.class));
+                }
+                else {
+                    startDetailActivity(BOOK_WEB_URL, myCookie.getAXCookie());
+                }
+                break;
+            case R.id.cv_card:
+                if (myCookie.getAXCookie() == null){
+                    Toast.makeText(CardViewActivity.this, "请先登录翱翔系统", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(CardViewActivity.this, LoginActivity.class));
+                }
+                else {
+                    startDetailActivity(CARD_WEB_URL, myCookie.getAXCookie());
+                }
+                break;
+            case R.id.cv_grading:
+                startDetailActivity(GRADING_WEB_URL, myCookie.getJWCookie());
+                break;
+            case R.id.cv_papertest:
+                startDetailActivity(PAPERTEST_WEB_URL, myCookie.getJWCookie());
+                break;
+            case R.id.cv_schedule:
+                startDetailActivity(SCHEDULE_WEB_URL, myCookie.getJWCookie());
+                break;
+        }
     }
 }
