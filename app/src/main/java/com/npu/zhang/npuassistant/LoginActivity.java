@@ -107,7 +107,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 if ((flag_ax) && (flag_jw)){
                     if (!flag_err){
                         saveUserInfo(username, password);
-                        sendBroadcast(new Intent("com.npu.zhang.npuassistant.finishInput"));
+                        if (!imagecode.equals("")){
+                            sendBroadcast(new Intent("com.npu.zhang.npuassistant.finishAXLogin"));
+                        }
+                        sendBroadcast(new Intent("com.npu.zhang.npuassistant.finishJWLogin"));
                         try {
                             Thread.sleep(500);
                         } catch (InterruptedException e) {

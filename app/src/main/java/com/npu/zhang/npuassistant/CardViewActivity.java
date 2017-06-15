@@ -16,6 +16,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.npu.zhang.npuassistant.Model.AXDataService;
 import com.npu.zhang.npuassistant.Model.JWDataService;
 
 import org.json.JSONArray;
@@ -36,24 +37,64 @@ public class CardViewActivity extends AppCompatActivity implements View.OnClickL
     private String username;
     private String password;
     public static MyCookie myCookie;
-    private AlertDialog.Builder builder;
     private ProgressDialog dialog;
+    private boolean AXFlag = true;
+    private boolean JWFlag = true;
+    private boolean AXServiceFlag = false;
+    private boolean JWServiceFlag = false;
+
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             switch (intent.getAction()){
                 case "com.npu.zhang.npuassistant.finishJWLogin":
+                    if (JWServiceFlag){
+                        unbindService(JWConnection);
+                    }
+                    JWFlag = false;
                     dialog.dismiss();
+                    dialog.setMessage("正在获取数据");
+                    dialog.show();
+                    System.out.println("finishJWLogin");
+                    bindService(new Intent(CardViewActivity.this, JWDataService.class), JWConnection, BIND_AUTO_CREATE);
                     break;
-                case "com.npu.zhang.npuassistant.finishInput":
-//                    getTxtFileInfo();
-//                    dialog.show();
-//                    Intent intent1 = new Intent(CardViewActivity.this, JWDataService.class);
-//                    intent1.putExtra("username", username);
-//                    intent1.putExtra("password", password);
-//                    bindService(intent1, JWConnection, BIND_AUTO_CREATE);
+                case "com.npu.zhang.npuassistant.finishAXLogin":
+                    AXFlag = false;
+                    System.out.println("finishAXLogin");
+                    bindService(new Intent(CardViewActivity.this, AXDataService.class), AXConnection, BIND_AUTO_CREATE);
                     break;
+                case "com.npu.zhang.npuassistant.finishJWDataGet":
+                    JWFlag = true;
+                    JWServiceFlag = false;
+                    System.out.println("finishJWDataGet");
+                    unbindService(JWConnection);
+
+                    ((TextView)findViewById(R.id.tv_TestName)).setText(intent.getStringExtra("testName"));
+                    ((TextView)findViewById(R.id.tv_TestLocation)).setText(intent.getStringExtra("testLocation"));
+                    ((TextView)findViewById(R.id.tv_TestDate)).setText(intent.getStringExtra("testDate"));
+                    ((TextView)findViewById(R.id.tv_TestTime)).setText(intent.getStringExtra("testTime"));
+
+                    break;
+                case "com.npu.zhang.npuassistant.finishAXDataGet":
+                    AXFlag = true;
+                    AXServiceFlag = false;
+                    System.out.println("finishAXDataGet");
+                    unbindService(AXConnection);
+
+                    ((TextView)findViewById(R.id.tv_cardblance)).setText(intent.getStringExtra("cardblance"));
+                    ((TextView)findViewById(R.id.tv_payment)).setText(intent.getStringExtra("payment"));
+                    ((TextView)findViewById(R.id.tv_occurrenceTime)).setText(intent.getStringExtra("occurrenceTime"));
+                    ((TextView)findViewById(R.id.tv_operationTitle)).setText(intent.getStringExtra("operationTitle"));
+
+                    ((TextView)findViewById(R.id.tv_circsCount)).setText(intent.getStringExtra("circsCount"));
+                    ((TextView)findViewById(R.id.tv_debt)).setText(intent.getStringExtra("debt"));
+                    ((TextView)findViewById(R.id.tv_minDueDayBookDate)).setText(intent.getStringExtra("minDueDayBookDate"));
+                    ((TextView)findViewById(R.id.tv_expiredBookCount)).setText(intent.getStringExtra("expiredBookCount"));
+                    break;
+            }
+            if (JWFlag && AXFlag){
+                dialog.dismiss();
             }
         }
     };
@@ -66,7 +107,8 @@ public class CardViewActivity extends AppCompatActivity implements View.OnClickL
 //        getData();
         IntentFilter intentFilter = new IntentFilter("com.npu.zhang.npuassistant.finishJWLogin");
         intentFilter.addAction("com.npu.zhang.npuassistant.finishAXLogin");
-        intentFilter.addAction("com.npu.zhang.npuassistant.finishInput");
+        intentFilter.addAction("com.npu.zhang.npuassistant.finishJWDataGet");
+        intentFilter.addAction("com.npu.zhang.npuassistant.finishAXDataGet");
         registerReceiver(broadcastReceiver, intentFilter);
 
         dialog = new ProgressDialog(this);
@@ -81,6 +123,7 @@ public class CardViewActivity extends AppCompatActivity implements View.OnClickL
             Intent intent = new Intent(this, JWDataService.class);
             intent.putExtra("username", username);
             intent.putExtra("password", password);
+            JWServiceFlag = true;
             bindService(intent, JWConnection, BIND_AUTO_CREATE);
         }
         else{
@@ -99,98 +142,24 @@ public class CardViewActivity extends AppCompatActivity implements View.OnClickL
 
         }
     };
+    private final ServiceConnection AXConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+
+        }
+    };
 
     private void findView(){
         findViewById(R.id.cv_card).setOnClickListener(this);
         findViewById(R.id.cv_papertest).setOnClickListener(this);
-        findViewById(R.id.cv_book).setOnClickListener(this);
         findViewById(R.id.cv_grading).setOnClickListener(this);
-        findViewById(R.id.cv_schedule).setOnClickListener(this);
     }
 
-    private void getData(){
-        Intent intent = getIntent();
-        String text = intent.getStringExtra("card");
-        ((TextView)findViewById(R.id.tv_cardblance)).setText(getCardData(text)[0]);
-        ((TextView)findViewById(R.id.tv_payment)).setText(getCardData(text)[1]);
-        ((TextView)findViewById(R.id.tv_occurrenceTime)).setText(getCardData(text)[2]);
-        ((TextView)findViewById(R.id.tv_operationTitle)).setText(getCardData(text)[3]);
-
-        text = intent.getStringExtra("book");
-        ((TextView)findViewById(R.id.tv_circsCount)).setText(getBookInfo(text)[0]);
-        ((TextView)findViewById(R.id.tv_debt)).setText(getBookInfo(text)[1]);
-        ((TextView)findViewById(R.id.tv_minDueDayBookDate)).setText(getBookInfo(text)[2]);
-        ((TextView)findViewById(R.id.tv_expiredBookCount)).setText(getBookInfo(text)[3]);
-
-//        System.out.println(intent.getStringExtra("exam"));
-        String[] exerciseData = getExceciseData(intent.getStringExtra("exercise"));
-        Intent intent1 = new Intent("com.npu.zhang.npuassistant.EXERCISE_UPDATE");
-        intent1.putExtra("exercise_num", "跑操次数：" + exerciseData[0]);
-        intent1.putExtra("exercise_pe", exerciseData[5]);
-        intent1.putExtra("exercise_teacher", exerciseData[6]);
-        sendBroadcast(intent1);
-    }
-
-    @Nullable
-    private String[] getExceciseData(String exercise){
-        try {
-            JSONObject jsonObject = new JSONObject(exercise);
-            JSONObject data = (JSONObject) jsonObject.getJSONArray("Result").get(0);
-            String NUM = data.getString("NUM");
-            String MINUTES = data.getString("MINUTES");
-            String KM = data.getString("MINUTES");
-            String CAL = data.getString("MINUTES");
-            String TODAYNUM = data.getString("MINUTES");
-            String PE = data.getString("PE");
-            String TEACHER = data.getString("TEACHER");
-
-            String[] result = new String[]{NUM, MINUTES, KM, CAL, TODAYNUM, PE, TEACHER};
-            return result;
-        } catch (JSONException e) {
-            Toast.makeText(CardViewActivity.this, "登陆失败！", Toast.LENGTH_LONG).show();
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    @Nullable
-    private String[] getCardData(String card){
-        try {
-            JSONObject jsonObject = new JSONObject(card);
-            JSONObject data = jsonObject.getJSONObject("data");
-            JSONArray list = data.getJSONArray("list");
-            JSONObject recentRecord = list.getJSONObject(0);
-            String blance = recentRecord.getString("blance");
-            String payment = recentRecord.getString("payment");
-            String occurrenceTime = recentRecord.getString("occurrenceTime");
-            String operationTitle = recentRecord.getString("operationTitle");
-            String[] result = new String[]{blance, payment, occurrenceTime, operationTitle};
-            return result;
-        } catch (JSONException e) {
-            Toast.makeText(CardViewActivity.this, "登陆失败！", Toast.LENGTH_LONG).show();
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-
-    @Nullable
-    private String[] getBookInfo(String book){
-        try {
-            JSONObject jsonObject = new JSONObject(book);
-            JSONObject data = jsonObject.getJSONObject("data");
-            String circsCount = data.getString("circsCount");
-            String debt = data.getString("debt");
-            String minDueDayBookDate = data.getString("minDueDayBookDate");
-            String expiredBookCount = data.getString("expiredBookCount");
-            String[] result = new String[]{circsCount, debt, minDueDayBookDate, expiredBookCount};
-            return result;
-        } catch (JSONException e) {
-            Toast.makeText(CardViewActivity.this, "登陆失败！", Toast.LENGTH_LONG).show();
-            e.printStackTrace();
-        }
-        return null;
-    }
 
 
     private void getTxtFileInfo(){
@@ -212,7 +181,12 @@ public class CardViewActivity extends AppCompatActivity implements View.OnClickL
     @Override
     protected void onDestroy() {
         unregisterReceiver(broadcastReceiver);
-        unbindService(JWConnection);
+        if (JWServiceFlag){
+            unbindService(JWConnection);
+        }
+        if (AXServiceFlag){
+            unbindService(AXConnection);
+        }
         super.onDestroy();
     }
 
@@ -226,15 +200,6 @@ public class CardViewActivity extends AppCompatActivity implements View.OnClickL
     @Override
     public void onClick(View view) {
         switch (view.getId()){
-            case R.id.cv_book:
-                if (myCookie.getAXCookie() == null){
-                    Toast.makeText(CardViewActivity.this, "请先登录翱翔系统", Toast.LENGTH_SHORT).show();
-                    startActivity(new Intent(CardViewActivity.this, LoginActivity.class));
-                }
-                else {
-                    startDetailActivity(BOOK_WEB_URL, myCookie.getAXCookie());
-                }
-                break;
             case R.id.cv_card:
                 if (myCookie.getAXCookie() == null){
                     Toast.makeText(CardViewActivity.this, "请先登录翱翔系统", Toast.LENGTH_SHORT).show();
@@ -249,9 +214,6 @@ public class CardViewActivity extends AppCompatActivity implements View.OnClickL
                 break;
             case R.id.cv_papertest:
                 startDetailActivity(PAPERTEST_WEB_URL, myCookie.getJWCookie());
-                break;
-            case R.id.cv_schedule:
-                startDetailActivity(SCHEDULE_WEB_URL, myCookie.getJWCookie());
                 break;
         }
     }

@@ -13,6 +13,7 @@ public class UrlCollection {
     public static final String JW_LOGIN_URL = "http://us.nwpu.edu.cn/eams/login.action";
     public static final String JW_EXAM_URL = "http://us.nwpu.edu.cn/eams/stdExamTable!examTable.action?examBatch.id=261";
     public static final String EXERCISE_URL = "http://222.24.192.216:9000/NEW/PublicRequest?RequestName=GetExerciseInfo&RequestData=%7BNO:";
+    public static final String PAPERTEST_URL = "http://us.nwpu.edu.cn/eams/stdExamTable!examTable.action?examBatch.id=283";
 
     public static final String CARD_WEB_URL = "https://ecampus.nwpu.edu.cn/web/guest/userdata/carddetail";
     public static final String PAPERTEST_WEB_URL = "http://us.nwpu.edu.cn/eams/stdExamTable.action";
