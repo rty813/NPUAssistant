@@ -6,12 +6,15 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.support.annotation.Nullable;
-import android.widget.Toast;
 
 import com.npu.zhang.npuassistant.CardViewActivity;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -22,7 +25,14 @@ import java.net.HttpCookie;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Call;
@@ -33,7 +43,9 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 
 import static com.npu.zhang.npuassistant.CardViewActivity.myCookie;
-import static com.npu.zhang.npuassistant.UrlCollection.*;
+import static com.npu.zhang.npuassistant.UrlCollection.EXERCISE_URL;
+import static com.npu.zhang.npuassistant.UrlCollection.JW_LOGIN_URL;
+import static com.npu.zhang.npuassistant.UrlCollection.PAPERTEST_URL;
 
 public class JWDataService extends Service {
     private CookieManager cookieManager;
@@ -138,6 +150,8 @@ public class JWDataService extends Service {
             @Override
             public void run() {
                 try {
+                    Map<String, String> finalMap = null;
+
                     URL url = new URL(PAPERTEST_URL);
                     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                     connection.setRequestProperty("Cookie", CardViewActivity.myCookie.getJWCookie());
@@ -151,14 +165,46 @@ public class JWDataService extends Service {
                     String paperTestData = builder.toString();
                     System.out.println(paperTestData);
 
-                    msgIntent.putExtra("testName", "空气动力学");
-                    msgIntent.putExtra("testLocation", "教学西楼D座301");
-                    msgIntent.putExtra("testDate", "2017年6月15日");
-                    msgIntent.putExtra("testTime", "21点56分");
+                    Document document = Jsoup.parse(paperTestData);
+                    Elements trTags = document.select("tr");
+                    for (Element trTag : trTags){
+                        Elements tdTags = trTag.select("td");
+                        if (tdTags.size() == 0){
+                            continue;
+                        }
+                        Map<String, String> map = new HashMap<String, String>();
+                        map.put("testName", tdTags.get(1).html());
+                        map.put("testLocation", tdTags.get(7).select("a").html());
+                        map.put("testDate", tdTags.get(3).html());
+                        map.put("testTime", tdTags.get(4).html());
+
+                        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.CHINA);
+                        Date nowDate = dateFormat.parse(dateFormat.format(new Date()));
+                        Date date=  dateFormat.parse(map.get("testDate") + " " + map.get("testTime").substring(0, 4));
+                        if (date.getTime() < nowDate.getTime()){
+                            continue;
+                        }
+                        if (finalMap == null){
+                            finalMap = map;
+                        }
+                        else {
+                            Date finalDate = dateFormat.parse(finalMap.get("testDate") + " " + finalMap.get("testTime").substring(0, 4));
+                            if (date.getTime() < finalDate.getTime()){
+                                finalMap = map;
+                            }
+                        }
+                    }
+
+                    msgIntent.putExtra("testName", finalMap.get("testName"));
+                    msgIntent.putExtra("testLocation", finalMap.get("testLocation"));
+                    msgIntent.putExtra("testDate", finalMap.get("testDate"));
+                    msgIntent.putExtra("testTime", finalMap.get("testTime"));
                     handler.sendEmptyMessage(1);
                 } catch (MalformedURLException e) {
                     e.printStackTrace();
                 } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (ParseException e) {
                     e.printStackTrace();
                 }
 
