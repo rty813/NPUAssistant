@@ -195,10 +195,15 @@ public class JWDataService extends Service {
                         }
                     }
 
-                    msgIntent.putExtra("testName", finalMap.get("testName"));
-                    msgIntent.putExtra("testLocation", finalMap.get("testLocation"));
-                    msgIntent.putExtra("testDate", finalMap.get("testDate"));
-                    msgIntent.putExtra("testTime", finalMap.get("testTime"));
+                    if (finalMap == null){
+                        msgIntent.putExtra("testName", "null");
+                    }
+                    else{
+                        msgIntent.putExtra("testName", finalMap.get("testName"));
+                        msgIntent.putExtra("testLocation", finalMap.get("testLocation"));
+                        msgIntent.putExtra("testDate", finalMap.get("testDate"));
+                        msgIntent.putExtra("testTime", finalMap.get("testTime"));
+                    }
                     handler.sendEmptyMessage(1);
                 } catch (MalformedURLException e) {
                     e.printStackTrace();

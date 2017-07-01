@@ -69,11 +69,15 @@ public class CardViewActivity extends AppCompatActivity implements View.OnClickL
                     JWServiceFlag = false;
                     System.out.println("finishJWDataGet");
                     unbindService(JWConnection);
-
-                    ((TextView)findViewById(R.id.tv_TestName)).setText(intent.getStringExtra("testName"));
-                    ((TextView)findViewById(R.id.tv_TestLocation)).setText(intent.getStringExtra("testLocation"));
-                    ((TextView)findViewById(R.id.tv_TestDate)).setText(intent.getStringExtra("testDate"));
-                    ((TextView)findViewById(R.id.tv_TestTime)).setText(intent.getStringExtra("testTime"));
+                    if (intent.getStringExtra("testName").equals("null")){
+                        ((TextView)findViewById(R.id.tv_TestName)).setText("当前暂无考试");
+                    }
+                    else{
+                        ((TextView)findViewById(R.id.tv_TestName)).setText(intent.getStringExtra("testName"));
+                        ((TextView)findViewById(R.id.tv_TestLocation)).setText(intent.getStringExtra("testLocation"));
+                        ((TextView)findViewById(R.id.tv_TestDate)).setText(intent.getStringExtra("testDate"));
+                        ((TextView)findViewById(R.id.tv_TestTime)).setText(intent.getStringExtra("testTime"));
+                    }
 
                     break;
                 case "com.npu.zhang.npuassistant.finishAXDataGet":
